@@ -2,7 +2,7 @@ import { useEffect, useState  } from 'react';
 import { StyleSheet, Text, View, Alert, ActivityIndicator, Button, Pressable  } from 'react-native';
 import { colorsToEmoji, colors, CLEAR, ENTER } from '../../constants';;
 import Keyboard from '../Keyboard';
-import * as Clipboard  from 'expo-clipboard';
+// import * as Clipboard  from 'expo-clipboard';
 import { copyArray, getDayOfYear, getDayOfYearKey, setLetters } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import words from '../../utils/words';
@@ -207,13 +207,13 @@ const readState = async () => {
   //   Alert.alert('Copied to your clipboard', 'Paste to share to social media')
   // }
 
-  const shareScore = () => {
-    const textMap = rows.map((_,i) =>
-    row => row[i] ).join('')
-    const textToShare = `Six(S) ${showScore} / ${showMaxScore} \n ${textMap} \n Time left: ${timerCount}`;
-    Clipboard.setString(textToShare)
-    Alert.alert('Copied to your clipboard', 'Paste to share to social media')
-  }
+  // const shareScore = () => {
+  //   const textMap = rows.map((_,i) =>
+  //   row => row[i] ).join('')
+  //   const textToShare = `Six(S) ${showScore} / ${showMaxScore} \n ${textMap} \n Time left: ${timerCount}`;
+  //   Clipboard.setString(textToShare)
+  //   Alert.alert('Copied to your clipboard', 'Paste to share to social media')
+  // }
 
 
 const scoreRow = (word, row) => {
@@ -602,7 +602,7 @@ const scoreRow = (word, row) => {
       gameState: 'won',
     });
     // gameState = 'won';
-    shareScore();
+    // shareScore();
     return;
   }
 

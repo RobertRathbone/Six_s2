@@ -21,6 +21,7 @@ import useFonts from './hooks/useFonts';
 
 const NUMBER_OF_TRIES  = 6;
 var sendLetters = setLetters();
+var score = 0;
 var shareArray =  
 // ['K', 'L', 'M', 'N', 'N', 'P',
 // 'K', 'L', 'M', 'N', 'N', 'P',
@@ -121,7 +122,7 @@ export default function App() {
                 <Stack.Screen
                 name="Share"
                 component={SharePage}
-                options={{ shareArray: {shareArray}}}
+                options={{ shareArray: {shareArray}, score: {score} }}
                 />
 
             </Stack.Navigator>

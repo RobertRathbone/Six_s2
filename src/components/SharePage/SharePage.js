@@ -10,7 +10,7 @@ import * as Sharing from "expo-sharing";
 
 
 const SharePage = ({ route, navigation }) => {
-  const { shareArray } = route.params;
+  const { shareArray, score } = route.params;
   const viewShot = useRef();
   console.log(shareArray, 'inShare')
 
@@ -26,11 +26,11 @@ const SharePage = ({ route, navigation }) => {
       <>
       <ViewShot
         ref = {viewShot}
-        options={{ format: "jpg", quality: 0.9 }}
+        options={{ format: "jpg", quality: 0.7 }}
       >
       
        <View style={styles.shareArry}>
-       <Text> Six(S)</Text>
+       <Text> {`${score}`} Six(S)</Text>
           {shareArray.map((row, i) => 
             <Animated.View entering={SlideInLeft.delay(i*300)}
             key={`row-${i}`} style ={styles.row}>
@@ -48,15 +48,20 @@ const SharePage = ({ route, navigation }) => {
 
         </ViewShot>
 
+        <View style={styles.shareArry}>  
         <Pressable
             style={styles.amDoneButton}
             onPress={captureAndShareScreenshot}
             >
+              <Text style={styles.button}>
+                Share
+              </Text>
             {/* <Image
             source={require("../../assets/icons/share.png")}
             style={styles.iconImage}
             /> */}
         </Pressable>
+        </View>
         
       </>
 
@@ -76,10 +81,17 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         fontWeight: 'bold',
     },
+    button: {
+      fontSize: 20,
+      color: 'white',
+      textAlign: 'center',
+      marginVertical: 15,
+      fontWeight: 'bold',
+  },
     shareArry: {
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 100,
+      marginTop: 10,
     },
     row: {
         // alignSelf: 'stretch',

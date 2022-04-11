@@ -138,7 +138,7 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
 
                 <View style={{ alignItems: 'center', padding: 10 }}>
                 <Pressable style={styles.amDoneButton} onPress={ () => 
-                navigation.navigate('Share', { shareArray: shareArray} )
+                navigation.navigate('Share', { shareArray: shareArray, score: score} )
                  } >
                     <Text style={{ color: colors.lightgrey, fontSize: 20, }}>Share</Text>
                 </Pressable>
