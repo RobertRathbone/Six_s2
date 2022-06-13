@@ -6,6 +6,7 @@ import { getDayOfYear, setLetters } from "../../utils";
 import LetterList from "../../utils/LetterList";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { auth } from '../../../firebase'
 
 
 const dayOfTheYear = getDayOfYear();
@@ -47,20 +48,25 @@ const StartPage = ({ navigation }) => {
     //     return;
     //   }
 
+    const handleSignOut = () => {
+        auth
+        .signOut()
+        .then(() => {
+          navigation.replace('Login')
+        })
+        .catch(error => alert(error.message))
+      }
+
     return (
         <ScrollView>
             <View style={styles.container}>
                 <Text style = {styles.instructions}>
-                    The goal of Six(S) is to find six words with the ten letters provided.
-                    The scores are beneath the letters, and the 'S' will always be worth 6.
-                    The magenta squares are worth double, and six letter words are worth
-                    double as well.  {'\n'}
-                    The time remaining will be shown with your score, but don't worry, if 
-                    you can't solve it in 6 minutes, you can keep playing.
+                    Use the keyboard to spell your words. Hit enter when you have finished a word, that will add to your score. You can use the arrows to move up and down. You can go up and change your word if you want, hit enter for a new score. Hit 'I Am Done' when you are finished.
                     {'\n'}
-                    Hard Mode only awards double letter scores for the same letter in the magenta 
+                    
+                    {/* Hard Mode only awards double letter scores for the same letter in the magenta 
                     squares. 
-                    {'\n'}
+                    {'\n'} */}
                     Everyone plays the same daily letters. Practice is available.
                     {'\n'} {'\n'}See if you can beat the Max Score!
                 </Text>
@@ -83,6 +89,12 @@ const StartPage = ({ navigation }) => {
                 navigation.navigate('Game', {letters: setLetters(), gameState: 'practice' })
                  } >
                     <Text style={{ color: colors.lightgrey, fontSize: 20, }}>Practice</Text>
+                </Pressable>
+            </View>
+            <View style={{ alignItems: 'center', padding: 10 }}>
+                <Pressable style={styles.amDoneButton} onPress={handleSignOut} >
+                    <Text style={{ color: colors.lightgrey, fontSize: 16, }}>Sign Out</Text>
+                    <Text style={{ color: colors.lightgrey, fontSize: 8, }}>{auth.currentUser?.email} </Text>
                 </Pressable>
             </View>
 

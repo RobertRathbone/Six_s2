@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, Platform} from 'react-native';
 import { colors } from './src/constants';
 import Game from './src/components/Game/Game';
 import StartPage from './src/components/StartPage';
 import SharePage from './src/components/SharePage';
+import LoginScreen from './src/components/LoginScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setLetters, getDayOfYear, getDayOfYearKey } from './src/utils';
 import LetterList from './src/utils/LetterList';
@@ -17,7 +18,11 @@ import * as Font from 'expo-font';
 import AppLoading from 'expo-app-loading';
 import useFonts from './hooks/useFonts';
 
-// import Purchases from 'react-native-purchases';
+
+
+import Purchases from 'react-native-purchases';
+
+
 
 const NUMBER_OF_TRIES  = 6;
 var sendLetters = setLetters();
@@ -77,9 +82,35 @@ const letters = sendLetters.toString().toUpperCase().replace(/,/g, "");
 
 
 
-export default function App() {
+const App = (() => {
+
+  useEffect(async() => {
+    Purchases.setDebugLogsEnabled(true);
+    if (Platform.OS === 'ios') {
+      console.log('yo')
+      await Purchases.setup('appl_pypHRvkonNwzsuaWDQSwvacGnbv');
+      console.log('after await purchases');
+    } else if (Platform.OS === 'android') {
+      console.log('ho')
+      await Purchases.setup('goog_qXkCBjzUWvWJHsxFDivMbvXVDHT');
+    };
+
+    // const packageSetter = async () => {
+    // try {
+    //   const offerings = await Purchases.getOfferings();
+    //   if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+    //     setPackages(offerings.current.availablePackages);
+    //     console.log('packages', packages)
+    //     // Display packages for sale
+    //   }
+    // } catch (e) {
+    //   console.log ('no packages')
+    // } }
+    // packageSetter();
+  }, [])
 
   const [IsReady, SetIsReady] = useState(false);
+  const [packages, setPackages] = useState([]);
 
   const LoadFonts = async () => {
     await useFonts();
@@ -95,6 +126,11 @@ export default function App() {
     );
   }
 
+  
+
+
+  
+
   // const [isLoaded] = useFonts({
   //   "frisbeespidercolorbox": require("./assets/fonts/frisbeespidercolorbox.ttf"),
   // });
@@ -109,6 +145,10 @@ export default function App() {
     {/* <SafeAreaView style={styles.container}> */}
       <StatusBar style="light" />
       <Stack.Navigator>
+                <Stack.Screen 
+                options={{ headerShown: false }} 
+                name="Login" component={LoginScreen} 
+                />
                 <Stack.Screen
                 name="Six(S)"
                 component={StartPage}
@@ -133,7 +173,9 @@ export default function App() {
     {/* </SafeAreaView> */}
     </NavigationContainer>
   );
-}
+})
+
+export default App;
 
 const styles = StyleSheet.create({
   container: {
@@ -157,4 +199,5 @@ const styles = StyleSheet.create({
     letterSpacing: 22,
     lineHeight: 23,
   },
+  
 });

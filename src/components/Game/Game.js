@@ -1,5 +1,5 @@
 import { useEffect, useState  } from 'react';
-import { StyleSheet, Text, View, Alert, ActivityIndicator, Button, Pressable  } from 'react-native';
+import { StyleSheet, Text, View, Alert, ActivityIndicator, ScrollView, Pressable  } from 'react-native';
 import { colorsToEmoji, colors, CLEAR, ENTER } from '../../constants';;
 import Keyboard from '../Keyboard';
 // import * as Clipboard  from 'expo-clipboard';
@@ -15,6 +15,7 @@ import Animated, {
     FlipInEasyY
   } from 'react-native-reanimated';
   import { Dimensions } from 'react-native';
+import Purchases from 'react-native-purchases';
 
 const NUMBER_OF_TRIES  = 8;
 
@@ -93,6 +94,22 @@ const Game = ({route, navigation}) => {
     readState();
     maxScore();
     console.log( 'banana', highScores[0],highScores[1],highScores[2],highScores[3],highScores[4],highScores[5]);
+  }, []);
+
+  useEffect(() => {
+
+    const getPackages = async () => {
+      try {
+        const offerings = await Purchases.getOfferings();
+        if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+          setPackages(offerings.current.availablePackages);
+        }
+      } catch (e) {
+        Alert.alert('Error getting offers', e.message);
+      }
+    };
+
+    getPackages();
   }, []);
 
 const persistState = async () => {
@@ -608,7 +625,8 @@ const scoreRow = (word, row) => {
 
   return (
       <>
-      <View style= {styles.container}>
+      <ScrollView>
+        <View style= {styles.container}>
         <Animated.Text entering={SlideInLeft.delay(300)} style={styles.title}>{letters}</Animated.Text>
         <Animated.Text entering={SlideInLeft.delay(600)} style={styles.subtitle}>1111234566</Animated.Text>
         
@@ -664,7 +682,8 @@ const scoreRow = (word, row) => {
           </Pressable>
       </View>
       </View>
-    </View>
+      </View>
+    </ScrollView>
     </>
   );
 }
@@ -702,7 +721,7 @@ const styles = StyleSheet.create({
   
     },
     cell:{
-      borderWidth: 3,
+      borderWidth: 1,
       borderColor: colors.darkgrey,
       flex: 1,
       maxWidth: '11%',
