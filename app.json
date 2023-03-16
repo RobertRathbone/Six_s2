@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "gamesix",
+    "slug": "sixSGame",
+    "version": "1.1.18",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.frisbeespider.SixSGame",
+      "version": "1.1.19",
+      "buildNumber": "23",
+      "icon": "./hooks/assets/0.png"
+    },
+    "android": {
+      "package": "com.frisbeespider.SixSGame",
+      "versionCode": 23,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "10033c05-cc53-4afb-8695-8966eb632533"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true
+          }
+        }
+      ],
+      "react-native-iap"
+    ]
+  }
+}
