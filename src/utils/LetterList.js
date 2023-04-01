@@ -4,10 +4,10 @@ export default [
         "a",
         "e",
         "t",
+        "r",
         "n",
         "p",
         "k",
-        "q",
         "b",
         "s",
       ] ,
@@ -192,7 +192,7 @@ export default [
         "s",
       ],
       [
-        "a",
+        "u",
         "o",
         "e",
         "l",
@@ -1069,7 +1069,7 @@ export default [
       ]
       , [
         "o",
-        "i",
+        "u",
         "e",
         "d",
         "f",
@@ -1092,7 +1092,7 @@ export default [
         "s",
       ]
       , [
-        "i",
+        "u",
         "a",
         "e",
         "g",
@@ -1237,7 +1237,7 @@ export default [
       ]
       , [
         "i",
-        "o",
+        "u",
         "e",
         "c",
         "n",
@@ -1574,7 +1574,7 @@ export default [
       , [
         "a",
         "i",
-        "e",
+        "u",
         "m",
         "l",
         "d",
@@ -1777,7 +1777,7 @@ export default [
       ]
       , [
         "a",
-        "o",
+        "u",
         "e",
         "m",
         "l",
@@ -1915,7 +1915,7 @@ export default [
         "m",
         "l",
         "t",
-        "q",
+        "b",
         "y",
         "s",
       ]
@@ -2023,7 +2023,7 @@ export default [
         "d",
         "h",
         "f",
-        "q",
+        "y",
         "b",
         "s",
       ]
@@ -2209,7 +2209,7 @@ export default [
       ]
       , [
         "a",
-        "i",
+        "u",
         "e",
         "g",
         "m",
@@ -2575,7 +2575,7 @@ export default [
         "m",
         "r",
         "t",
-        "q",
+        "b",
         "y",
         "s",
       ]
@@ -2952,7 +2952,7 @@ export default [
         "s",
       ]
       , [
-        "i",
+        "u",
         "a",
         "e",
         "g",
@@ -3140,7 +3140,7 @@ export default [
         "c",
         "l",
         "y",
-        "q",
+        "b",
         "s",
       ]
       , [
@@ -3265,7 +3265,7 @@ export default [
       ]
       , [
         "a",
-        "o",
+        "u",
         "e",
         "c",
         "k",
@@ -3288,7 +3288,7 @@ export default [
         "s",
       ]
       , [
-        "i",
+        "u",
         "o",
         "e",
         "d",
@@ -3373,7 +3373,7 @@ export default [
       ]
       , [
         "i",
-        "o",
+        "u",
         "e",
         "m",
         "p",
@@ -3422,7 +3422,7 @@ export default [
       , [
         "i",
         "a",
-        "e",
+        "u",
         "r",
         "c",
         "f",
@@ -3439,7 +3439,7 @@ export default [
         "m",
         "k",
         "d",
-        "q",
+        "b",
         "y",
         "s",
       ]
@@ -3528,7 +3528,7 @@ export default [
         "s",
       ]
       , [
-        "i",
+        "u",
         "a",
         "e",
         "h",
@@ -3564,7 +3564,7 @@ export default [
         "s",
       ]
       , [
-        "i",
+        "u",
         "a",
         "e",
         "r",
@@ -3637,7 +3637,7 @@ export default [
       ]
       , [
         "o",
-        "i",
+        "u",
         "e",
         "r",
         "f",
@@ -3655,12 +3655,12 @@ export default [
         "g",
         "n",
         "t",
-        "q",
+        "y",
         "b",
         "s",
       ]
       , [
-        "a",
+        "u",
         "i",
         "e",
         "f",
@@ -3698,7 +3698,7 @@ export default [
       , [
         "o",
         "a",
-        "e",
+        "u",
         "m",
         "l",
         "h",
@@ -3823,7 +3823,7 @@ export default [
         "k",
         "h",
         "l",
-        "q",
+        "y",
         "b",
         "s",
       ]
@@ -3868,11 +3868,11 @@ export default [
         "u",
         "e",
         "t",
+        "d",
         "p",
         "n",
         "r",
         "w",
-        "q",
         "s",
       ]
       , [
@@ -4164,7 +4164,7 @@ export default [
         "s",
       ]
       , [
-        "o",
+        "u",
         "a",
         "e",
         "d",
@@ -4490,7 +4490,7 @@ export default [
       , [
         "o",
         "a",
-        "e",
+        "u",
         "m",
         "c",
         "g",
