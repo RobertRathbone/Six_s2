@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 import { colors } from "../../constants";
 import Animated, {
@@ -19,16 +19,25 @@ const Number = ({number, label}) => (
 
 
 
-const GuessDistributionLine = ({position, amount, percentage}) => {
+const GuessDistributionLine = ({ position, amount, percentage }) => {
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-            <Text style={{ color: colors.lightgrey}}>{position}</Text>
-        <View style={{ alignSelf: 'stretch', backgroundColor: colors.grey, margin: 5, padding: 5, width: `${percentage}%` }}>
-            <Text style={{ color: colors.lightgrey}}>{amount}</Text>
+      <View style={{ flexDirection: 'row', width: '100%' }}>
+        <Text style={{ color: colors.lightgrey }}>{position}</Text>
+        <View
+          style={{
+            alignSelf: 'stretch',
+            backgroundColor: colors.grey,
+            margin: 5,
+            padding: 5,
+            width: `${percentage}%`,
+          }}
+        >
+          <Text style={{ color: colors.lightgrey }}>{amount}</Text>
         </View>
-        </View>
+      </View>
     );
-};
+  };
+  
 
 const bonusCell = (row, col) => {
     return (row+col)%8!=0
@@ -45,7 +54,7 @@ const GuessDistribution =() => {
     )   
 }
 
-const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray, purpleShare }) => {
+const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray, purpleShare, time }) => {
     const navigation = useNavigation();
     const [secondsTilTomorrow, setSecondsTilTomorrow] = useState();
     const highScoreArrayFill = highScores.toString().replace(/,/g,'').split('');
@@ -58,7 +67,11 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
             k++;
         }
     }
-    console.log("Final Page", score, purpleShare)
+    useEffect(() => {
+      
+      console.log("Final Page", score, purpleShare, time, shareArray)
+    },[])
+    
 
     useEffect(() => {
         const updateTime = () => {
@@ -67,6 +80,7 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
 
             setSecondsTilTomorrow(( tomorrow - now) /1000 );
         }; 
+
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
     }, []);
@@ -81,7 +95,7 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
 
 
     return (
-        <View style={{ alignItems: 'center' }}>
+        <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
             {/* <Text style={styles.title}>
                 {won ? 'Congrats' : 'Try again tomorrow'}
             </Text> */}
@@ -132,21 +146,22 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
           ))}
           </Animated.View>
             )}
-                <View style={{ alignItems: 'center', flex: 1 }}>
-                    <Text style={{ color: colors.lightgrey}}>Next Six(S)</Text>
-                    <Text style={{ color: colors.lightgrey, fontSize: 24, fontWeight: 'bold' }}>{formatSeconds()}</Text>
+                <View style={{ flex: 1 }}>
+                    <Text style={ purpleShare != 1 ? styles.nextColor : styles.nexxtBlank }>Next Six(S)</Text>
+                    <Text style={purpleShare != 1 ? styles.timeColor : styles.timeBlank }>{formatSeconds()}</Text>
                 </View>
 
-                <View style={{ alignItems: 'center', padding: 10 }}>
+                <View style={{ padding: 10 }}>
                 <Pressable style={styles.amDoneButton} onPress={ () => 
-                navigation.navigate('Share', { shareArray: shareArray, score: score, purpleShare: purpleShare} )
+                navigation.navigate('Share', { shareArray: shareArray, score: score, 
+                    purpleShare: purpleShare, time: time} )
                  } >
                     <Text style={{ color: colors.lightgrey, fontSize: 20, }}>Share</Text>
                 </Pressable>
                 
             </View>
 
-        </View>
+        </ScrollView>
     );
 };
 
@@ -164,6 +179,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     row: {
+        // alignSelf: 'stretch',
         flexDirection: 'row',
         justifyContent: 'flex-end',
     
@@ -178,6 +194,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
       },
+      nextColor: {
+        color: 'lightgrey',
+      },
+      nexxtBlank: {
+        color: 'white',
+        opacity: 0,
+      },
+      timeColor: { 
+        color: colors.lightgrey, 
+        fontSize: 24, 
+        fontWeight: 'bold' 
+    },
+    timeBlank: {
+        color: 'white',
+        opacity: 0,
+    },
       cellText: {
         color: colors.lightgrey,
         fontSize: 16,

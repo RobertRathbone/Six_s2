@@ -18,7 +18,7 @@ export const copyArray = (arr) => {
     const diff = now - start;
     const oneDay = 1000 * 60 * 60 * 24;
     const day = Math.floor(diff/oneDay);
-    return day;
+    return day ;
   };
 
   export const setLetters = () => {

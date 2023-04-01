@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View, SafeAreaView, ScrollView } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../../constants';
 import Game from '../Game/Game';
@@ -7,26 +7,31 @@ import LetterList from '../../utils/LetterList';
 import { getDayOfYear, setLetters } from '../../utils';
 import * as RNIap from 'react-native-iap';
 import { getProducts } from 'react-native-iap';
+import InstructionPage from '../InstructionPage';
 
 
 
-const dayOfTheYear = getDayOfYear();
-const dailyLetters = LetterList[dayOfTheYear];
+// const dayOfTheYear = getDayOfYear();
+// const dailyLetters = LetterList[dayOfTheYear];
 const skus = Platform.select({
   ios: ['sixs_3dollar_unlimited'],
   android: ['sixs_3dollar_unlimited'],
  });
 
-const LoginPage = ({ connected }) => {
+const LoginPage = ({ connected, challenge, noTimer }) => {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [purchaserInfo, setPurchaserInfo] = useState(null);
-
+  const dayOfTheYear = getDayOfYear();
+  console.log('dayOfTheYear', dayOfTheYear)
+  const dailyLetters = LetterList[dayOfTheYear];
+  console.log(dailyLetters)
   const navigation = useNavigation();
-
+  console.log('Login page, daily letters --->', dailyLetters)
   useEffect(() => {
     async function getPurchaseStatus() {
       try {
         const result = await RNIap.initConnection();
+        console.log(dailyLetters)
         console.log('In-app purchases connected:', result);
       } catch (e) {
         console.log('Error connecting to in-app purchase service:', e);
@@ -62,7 +67,11 @@ const LoginPage = ({ connected }) => {
   }, []);
 
   const goToGame = () => {
-    navigation.navigate('Game', { letters: dailyLetters, gameState: 'playing' });
+    navigation.navigate('Game', { letters: dailyLetters, gameState: 'playing', challenge: challenge, noTimer: noTimer });
+  };
+
+  const instructMe = () => {
+    navigation.navigate('Instruction');
   };
 
   const amIUpgraded = async () => {
@@ -71,7 +80,10 @@ const LoginPage = ({ connected }) => {
       console.log('Purchases:', purchases);
       const hasPurchased = purchases.some(purchase => purchase.productId === 'sixs_3dollar_unlimited');
       if (hasPurchased) {
-        navigation.navigate('Game', { letters: setLetters(), gameState: 'practice' });
+        navigation.navigate('Game', { letters: setLetters(), 
+          gameState: 'practice', 
+          challenge: challenge, 
+          noTimer: noTimer });
       } else {
         navigation.navigate('Paywall');
       }
@@ -88,8 +100,8 @@ const LoginPage = ({ connected }) => {
       with the associated scores below them. Vowels are worth one. Consonants increase in value as the list 
       moves right. Magenta squares are worth double. You can make 4 or 5 letter words, but 6 letter words are 
       worth double. {"\n"}
-      The trick with the S's. The first S in any row is worth 6, a subsequent S is only worth 1.
-      If you get one S in every row, then your whole score doubles. </Text>
+      There are two scoring modes you can change them on the Instructions Page. </Text>
+      {/* <Text style={styles.colorblock}>ABCDEFGHIJKLMNOP</Text> */}
         <Text style={styles.title}>           Six(S)           </Text>
         <TouchableOpacity style={styles.button} onPress={goToGame}>
           <Text style={styles.buttonText}>Daily</Text>
@@ -97,8 +109,8 @@ const LoginPage = ({ connected }) => {
         <TouchableOpacity style={styles.button} onPress={amIUpgraded}>
           <Text style={styles.buttonText}>Unlimited</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => Alert.alert('Restore Purchases', 'Are you sure?', [{ text: 'Cancel' }, { text: 'Yes', onPress: RNIap.restorePurchases }])}>
-          <Text style={styles.buttonText}>Restore Purchases</Text>
+        <TouchableOpacity style={styles.button} onPress={instructMe}>
+          <Text style={styles.buttonText}>Instructions / Settings</Text>
         </TouchableOpacity>
         {/* <TouchableOpacity style={styles.button} onPress={() => RNIap.requestPurchase('sixs_3dollar_unlimited')}>
           <Text style={styles.buttonText}>Upgrade to Unlimited</Text>
@@ -111,9 +123,13 @@ const LoginPage = ({ connected }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: 'grey',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  colorblock: {
+    fontFamily: "frisbeespidercolorbox",
+    fontSize: 36,
   },
   scroll: {
     justifyContent: 'center',

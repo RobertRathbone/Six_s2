@@ -1,10 +1,20 @@
-import { useEffect, useState  } from 'react';
-import { StyleSheet, Text, View, Alert, ActivityIndicator, ScrollView, Pressable, SafeAreaView  } from 'react-native';
+import { useEffect, useState, React, Fragment  } from 'react';
+import { StyleSheet, 
+  Text, 
+  View, 
+  Alert, 
+  ActivityIndicator, 
+  ScrollView, 
+  Pressable, 
+  SafeAreaView,
+  TouchableOpacity,
+  TouchableWithoutFeedback } from 'react-native';
 import { colorsToEmoji, colors, CLEAR, ENTER } from '../../constants';;
 import Keyboard from '../Keyboard';
 import { copyArray, getDayOfYear, getDayOfYearKey, setLetters } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import words from '../../utils/words';
+import words1 from '../../utils/words1';
+import words2 from '../../utils/words2';
 import LetterList from '../../utils/LetterList';
 import FinalPage from '../FinalPage';
 import Animated, {
@@ -14,9 +24,10 @@ import Animated, {
     FlipInEasyY
   } from 'react-native-reanimated';
  import { Dimensions } from 'react-native';
+ import { useNavigation } from '@react-navigation/native';
 // import Purchases from 'react-native-purchases';
 
-const NUMBER_OF_TRIES  = 8;
+const NUMBER_OF_TRIES  = 6;
 
 
 const dayOfTheYear = getDayOfYear();
@@ -24,13 +35,15 @@ const dayOfTheYearKey = getDayOfYearKey();
 const dayKey = `day-${dayOfTheYearKey}`
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+const dailyLetters = LetterList[dayOfTheYear];
 
 
-const Game = ({route, navigation}) => {
-  const { letters } = route.params;
-  const { gameState } = route.params;
+
+const Game = ({route, navigation}) => { 
+  const { letters, gameState, challenge, noTimer } = route.params;
   const [rows, setRows] = useState(
     new Array(6).fill(new Array(6).fill(''))); // creates 2D array of empty boxes
+  const blank = new Array(6).fill(new Array(6).fill('')); 
   const[scoreArray, setScoreArray] = useState(
     new Array(6).fill(new Array(6).fill(0)));
   const[shareArray, setShareArray] = useState(
@@ -42,6 +55,7 @@ const Game = ({route, navigation}) => {
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
   const [gameStatePlay, setGameStatePlay] = useState('playing');
+  const [gameStartedDate, setGameStartedDate] = useState(null); 
   const [loaded, setLoaded] = useState(false);
   const [dayLetters, setDayLetters] = useState(letters);
   const [timerCount, setTimer] = useState(360);
@@ -56,6 +70,7 @@ const Game = ({route, navigation}) => {
   const [highScores, setHighScores] = useState([]);
   const [purpleShare, setPurpleShare] = useState(0);
   var [sDouble, setSDouble] = useState(0);
+  const [currentDay, setCurrentDay] = useState(getDayOfYear());
   let double = false;
   let x = 1;
   let y = 1;
@@ -96,13 +111,49 @@ const Game = ({route, navigation}) => {
       }
   }, [rows, curRow, curCol]);
 
-  useEffect(() => {
+  useEffect(() => { 
     readState();
-    maxScore();
+    if (challenge){ 
+      maxScore(words2);
+      console.log('Yes, challenge!')
+      console.log(challenge)
+    }
+    else {
+      maxScore(words1);
+      console.log('no challenge?')
+      console.log(challenge)
+    }
+    
+    
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentDay(getDayOfYear());
+    }, 60 * 5000); // update the day every five minutes
+  
+    return () => clearInterval(intervalId);
   }, []);
 
 
-const persistState = async () => {
+  const persistState = async () => {
+    try {
+      const dataString = await AsyncStorage.getItem('@game');
+      const data = JSON.parse(dataString);
+      const day = data[dayKey];
+      const currentDay = getDayOfYear(); // changwed to 85,90 and 95
+      if (day && day.dayOfTheYear !== currentDay) {
+        setRows(blank);
+        setCurCol(0);
+        setCurRow(0);
+        setGameStatePlay('playing');
+        setDayLetters(dailyLetters);
+        setShowScore(0);
+        setTimer(360);
+      }
+} catch (e) {
+  // console.log('New player', dayKey);
+  }
   if (gameState == 'playing'){
     const dataForToday = {
       dayOfTheYear,
@@ -114,6 +165,7 @@ const persistState = async () => {
       score, 
       timerCount
     };
+    // console.log('dataForToday', dataForToday.dayOfTheYear, dayOfTheYear)
     try {
       const existingStateString = await AsyncStorage.getItem('@game');
       const existingState =  existingStateString ? JSON.parse(existingStateString) : {};
@@ -134,10 +186,18 @@ const persistState = async () => {
 const readState = async () => {
   if (gameState != 'practice'){
   const dataString = await AsyncStorage.getItem('@game');
-  console.log('reading')
   try {
     const data = JSON.parse(dataString);
     const day = data[dayKey];
+    if (day == undefined){
+      setRows(blank);
+      setCurCol(0);
+      setCurRow(0);
+      setGameStatePlay('practice');
+      setDayLetters(dailyLetters);
+      setShowScore(0);
+      setTimer(360);;
+    }else {
     setRows(day.rows);
     setCurCol(day.curCol);
     setCurRow(day.curRow);
@@ -145,6 +205,7 @@ const readState = async () => {
     setDayLetters(day.dayLetters);
     setShowScore(day.score);
     setTimer(day.timerCount);
+    }
   } catch (e) {
     console.log('Could not parse the state', e, dayKey);
   }
@@ -157,29 +218,95 @@ const readState = async () => {
 }
 }
 
+const onCellPress = (rowIndex, colIndex) => {
+  setCurRow(rowIndex);
+  setCurCol(colIndex);
+};
+
+
 
 const SCheck = (rows, showScore) => {
   let SCount = 0;
   let SCountArray =[];
   for (let i=0; i< rows.length; i++){
     for (let j=0; j< rows[i].length; j++) {
-
       if (rows[i][j] == letters[9]){
         SCount ++
       } 
     }
-
-    console.log('Scount', SCount)
     SCountArray.push(SCount)
-    console.log('Scountarray', SCountArray)
     SCount = 0;
-    if (JSON.stringify(SCountArray) === JSON.stringify([1,1,1,1,1,1])){
+    if (JSON.stringify(SCountArray) === JSON.stringify([1,1,1,1,1,1]) && challenge ){
       double = true;
       setShowScore(showScore *2);
     }
   }
 
 }
+
+const regularScoreRow = (word, row) => {
+  const updatedScoreArray = copyArray(scoreArray);
+  const updatedShareArray = copyArray(shareArray);
+  
+    for (let i = 0; i< word.length; i++){
+        var addToScore =0;
+        var x = 1;
+        if (row==0 && i == 0 || 
+            row==3 && i == 5 ||
+            row==4 && i == 4 ||
+            row==5 && i == 3 ){
+            x = 2;
+        }
+        if (word[i] == letters[0] ||
+            word[i] == letters[2] ||
+            word[i] == letters[2] ||
+            word[i] == letters[3] ) {
+            addToScore =  (1 * x);
+            // console.log(word[i], i, score);
+            }
+        else if ( word[i] == letters[4]) {
+            addToScore =  (2 * x);
+            // console.log(word[i], i, score);
+        }
+        else if (word[i] == letters[5]) {
+            addToScore =  (3 * x);
+            // console.log(word[i], i, score);
+        }
+        else if (word[i] == letters[6]) {
+            addToScore = (4 * x);
+            // console.log(word[i], i, score);
+        }
+        else if (word[i] == letters[7]) {
+            addToScore =  (5 * x);
+            // console.log(word[i], i, score);
+        }
+        else if (word[i] == letters[8]) {
+            addToScore = (6 * x);
+            // console.log(word[i], i, score);
+        }
+        else if (word[i] == letters[9]) {
+            addToScore =  (6 * x);
+            // console.log(word[i], i, score);
+        }
+        score = score + addToScore;
+        
+        updatedScoreArray[row][i]= addToScore;
+        updatedShareArray[row][i]= getShareScoreColor(addToScore);
+        // console.log(row,i, addToScore, updatedScoreArray[row][i], updatedShareArray[row][i]);
+    }
+   
+    if (word.length == 6){
+        score = score *2
+    }
+    setScoreArray(updatedScoreArray);
+    setShareArray(updatedShareArray);
+    setSCheckArray(updatedShareArray)
+    console.log('shareArray', shareArray)
+    return score;
+}
+
+
+
 
 const scoreRow = (word, row) => {
   const updatedScoreArray = copyArray(scoreArray);
@@ -239,7 +366,9 @@ const scoreRow = (word, row) => {
     if (word.length == 6){
         score = score *2;
     }
-    if (sDouble >= 6){
+    if (sDouble >= 6 && challenge){
+      console.log('##########SDOUBLE#########')
+      console.log('challenge', challenge)
       score = score * 2;
     }
     if (sDouble >= 100){
@@ -247,11 +376,14 @@ const scoreRow = (word, row) => {
     }
     setScoreArray(updatedScoreArray);
     setShareArray(updatedShareArray);
+    setSCheckArray(updatedShareArray)
     setDoubleArray(doubleShareArray);
     return score;
 }
 
-  const maxScore = () => {
+
+
+  const maxScore = (words) => {
     const updatedHighScores = copyArray(highScores);
       const found = [];
       var maxScore0 = 0;
@@ -262,7 +394,7 @@ const scoreRow = (word, row) => {
       var maxScore5 = 0;
       var temp = 0;
       let notMe = 0;
-    for (let i = 0; i<15006; i++){
+    for (let i = 0; i<words.length; i++){
         notMe = 0;
         let word1 = words[i].split("");
         for (let j = 0; j<word1.length; j ++ ){
@@ -364,14 +496,20 @@ const scoreRow = (word, row) => {
         score = 0;
         setHighScores(updatedHighScores);
         };
-      setShowMaxScore(maxScore0 + maxScore1 + maxScore2 + maxScore3 + maxScore4 + maxScore5);
-      
+        if (challenge) {
+          setShowMaxScore(2*(maxScore0 + maxScore1 + maxScore2 + maxScore3 + maxScore4 + maxScore5));
+        }
+        else {
+          setShowMaxScore(maxScore0 + maxScore1 + maxScore2 + maxScore3 + maxScore4 + maxScore5);
+        }
     }
     score = maxScore0 + maxScore1 + maxScore2 + maxScore3 + maxScore4 + maxScore5
+
   };
 
-  const checkWord = (rowWord) => {
+  const checkWord = (rowWord, words) => {
     const updatedRows = copyArray(rows);
+    if (challenge){
     if (words.includes(rowWord)){
        scoreRow(rowWord, curRow)
         if (curRow == 0){
@@ -403,6 +541,40 @@ const scoreRow = (word, row) => {
         setCurCol(0);
         return;
     }
+    }
+    else {
+      if (words.includes(rowWord)){
+        regularScoreRow(rowWord, curRow)
+         if (curRow == 0){
+             setRow0Score(score);
+         } else if (curRow == 1)
+             {setRow1Score(score)
+         } else if (curRow == 2)
+             {setRow2Score(score);
+         } else if (curRow == 3)
+             {setRow3Score(score);
+         } else if (curRow == 4)
+             { setRow4Score(score);
+         } else if (curRow == 5)
+             { setRow5Score(score);
+         } 
+         score = 0;
+         setShowScore(row0Score + row1Score + row2Score + row3Score + row4Score + row5Score);
+         return true;
+     } else {
+         Alert.alert(`${rowWord} is not a word`, 'Try again');
+         updatedRows[curRow][curCol - 1] = '';
+         updatedRows[curRow][curCol - 2] = '';
+         updatedRows[curRow][curCol - 3] = '';
+         updatedRows[curRow][curCol - 4] = '';
+         updatedRows[curRow][curCol - 5] = '';
+         updatedRows[curRow][curCol - 6] = '';
+         setRows(updatedRows);
+         setCurRow(curRow);
+         setCurCol(0);
+         return;
+     }
+    }
   }
 
 
@@ -411,6 +583,7 @@ const scoreRow = (word, row) => {
     if (gameState == 'playing' || gameState == 'practice')
     {
     const updatedRows = copyArray(rows);
+
 
     if (key === CLEAR){
       const prevCol = curCol - 1;
@@ -429,11 +602,18 @@ const scoreRow = (word, row) => {
             setCurRow(curRow);
             setCurCol(curCol);
         }
+        
         return;
       }    
       if (key === "↓"){
           if (curRow < 5){
             setCurRow(curRow + 1);
+            if (curRow === 7){
+              setCurRow(6);
+            }
+          }
+          if (curRow === 7){
+            setCurRow(6);
           }
         return;
       }    
@@ -457,15 +637,27 @@ const scoreRow = (word, row) => {
         if (curRow<6){
             setCurRow(curRow + 1);
         }
-        checkWord(rowWord);
+        if (curRow === 7){
+          setCurRow(6);
+        }
+        checkWord(rowWord, words1);
         setCurCol(0);
         return;
     }
 
     if (curCol <rows[0].length) {
+      if (curCol === 7){
+        setCurCol(6)
+      }
+      if (curRow === 7){
+        setCurRow(6)
+      }
       updatedRows[curRow][curCol] = key;
       setRows(updatedRows);
       setCurCol(curCol +1);
+      if (curCol === 7){
+        setCurCol(6)
+      }
     }
   }
 }
@@ -503,7 +695,7 @@ const scoreRow = (word, row) => {
   };
 
   const getShareScoreColor =(addToScore) => {
-    console.log ('#########double ######### ', double, addToScore)
+    // console.log ('#########double ######### ', double, addToScore)
     if (double == true){
       addToScore = addToScore *2;
       console.log('added ', addToScore)
@@ -551,25 +743,30 @@ const scoreRow = (word, row) => {
     
       // readState();
     } else {
+    
     return (<FinalPage won={gameState === 'won'} 
+
     rows = {rows}
     highScores ={highScores} 
     score = {showScore}
     highscore = {showMaxScore}
-    shareArray = {shareArray}
+    shareArray = {SCheckArray}
     purpleShare = {purpleShare}
+    time = {timerCount}
     />)
     }
   }
 
   if (gameStatePlay === 'won'){
+   
     return (<FinalPage won={gameState === 'won'} 
     rows = {rows}
     highScores ={highScores} 
     score = {showScore}
     highscore = {showMaxScore}
-    shareArray = {shareArray}
+    shareArray = {SCheckArray}
     purpleShare = {purpleShare}
+    time = {timerCount}
     />)
   }
 
@@ -605,46 +802,31 @@ const scoreRow = (word, row) => {
         <Animated.Text entering={SlideInLeft.delay(600)} style={styles.subtitle}>1111234566</Animated.Text>
         
         <Animated.View style ={{ flexDirection: 'row' }} entering={SlideInLeft.delay(1000)}>
-          <Text style={{width: '30%', color: colors.lightgrey, fontSize: 18}}>Timer: {timerCount}</Text>
-          <Text style={{width: '30%', color: colors.lightgrey, fontSize: 18}}>Max: {showMaxScore}</Text>
-          <Text style={{width: '30%', color: colors.lightgrey, fontSize: 18 }}>Score: {showScore}</Text>
+          {noTimer ? null : <Text style={{width: '30%', color: colors.lightgrey, fontSize: 14}}>Timer: {timerCount}</Text>}
+          <Text style={{width: '25%', color: colors.lightgrey, fontSize: 14}}>Max: {showMaxScore}</Text>
+          <Text style={{width: '25%', color: colors.lightgrey, fontSize: 14 }}>Score: {showScore}</Text>
+          <Text style={{width: '20%', color: colors.lightgrey, fontSize: 14 }}>{challenge ? 'challenge' : 'regular'}</Text>
         </Animated.View>
         <View style={styles.map}> 
         
-          {rows.map((row, i) => 
-            <Animated.View entering={SlideInLeft.delay(i*300)}
-            key={`row-${i}`} style ={styles.row}>
-            {row.map((letter, j) => (
-                <>
-                  {i < curRow && (
-                < Animated.View entering={FlipInEasyY.delay(j*50)}  key={`cell-color-${i}-${j}`}               
-                style={[styles.cell, {borderColor: isCellActive(i,j)
-                  ? colors.grey
-                  : colors.darkgrey,
-                  backgroundColor: bonusCell(i,j)
-                  ? colors.black
-                  : '#661538',
-                  }]}>
-                  <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
-                </Animated.View>
-                )}
-                {i >= curRow && (
-                <View key={`cell-${i}-${j}`} 
-                style={[styles.cell, {borderColor: isCellActive(i,j)
-                  ? colors.grey
-                  : colors.darkgrey,
-                  backgroundColor: bonusCell(i,j)
-                  ? colors.black
-                  : '#661538',
-                  },
-                  ]}>
-                  <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
-                </View>
-                )}
-              </>
-            ))}
-          </Animated.View>
-          )}
+        {rows.map((row, i) =>
+  <Animated.View entering={SlideInLeft.delay(i * 300)} key={`row-${i}`} style={styles.row}>
+    {row.map((letter, j) => (
+      <TouchableWithoutFeedback key={`cell-${i}-${j}`} onPress={() => onCellPress(i, j)}>
+        <View style={[
+          styles.cell,
+          {
+            borderColor: isCellActive(i, j) ? colors.grey : colors.darkgrey,
+            backgroundColor: bonusCell(i, j) ? colors.black : '#661538',
+          }
+        ]}>
+          <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
+        </View>
+      </TouchableWithoutFeedback>
+    ))}
+  </Animated.View>
+)}
+
         <Keyboard onKeyPressed={onKeyPressed} 
       //   greenCaps={greenCaps}
       //   yellowCaps={yellowCaps}

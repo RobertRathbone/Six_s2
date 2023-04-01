@@ -1,27 +1,59 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  Platform,
+} from "react-native";
 import { useRef } from "react";
+import Animated, { SlideInLeft, FlipInEasyY } from "react-native-reanimated";
 import { colors } from "../../constants";
-import Animated, {
-    SlideInLeft, 
-    FlipInEasyY
-  } from 'react-native-reanimated';
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
-
+// import { captureRef } from "react-native-view-shot";
 
 const SharePage = ({ route, navigation }) => {
-  const { shareArray, score, purpleShare } = route.params;
+  const { shareArray, score, purpleShare, time } = route.params;
   const viewShot = useRef();
-  console.log(shareArray, 'inShare')
-  console.log("purple? ", purpleShare)
-  if (purpleShare == 1){
+  console.log('sharePage', shareArray);
+  console.log("purple? ", purpleShare);
+  if (purpleShare == 1) {
     var l = 9;
-    console.log("set l ---> ", l)
+    console.log("set l ---> ", l);
   } else {
-    var l =0
+    var l = 0;
   }
 
-  captureAndShareScreenshot = () => {
+// const firstSixItems = shareArray.slice(0, 1).map(row => row.slice(0, 6));
+// const firstSixItemsAreEqual = firstSixItems.every(
+//   row => row.every((item, index, arr) => item === arr[0])
+// );
+
+// if ( firstSixItemsAreEqual) {
+//   // Navigate back to the component where shareArray is generated
+//   navigation.goBack();
+//   return null;
+// }
+
+
+  const CellText = ({ letter, opacity }) => {
+    const androidOpacity =
+      Platform.OS === "android"
+        ? (letter.charCodeAt(0) - 73) / 100
+        : 1;
+    const finalOpacity =
+      Platform.OS === "android" ? androidOpacity * opacity : opacity;
+    console.log("finalOpacity", finalOpacity, letter.charCodeAt(0));
+    console.log("purpleshare", purpleShare, l, l);
+    return (
+      <Text style={[styles.cellText, { opacity: finalOpacity }]}>
+        {String.fromCharCode(letter.charCodeAt(0) - l)}
+      </Text>
+    );
+  };
+
+    captureAndShareScreenshot = () => {
     viewShot.current.capture().then((uri) => {
     console.log("do something with ", uri);
     Sharing.shareAsync("file://" + uri);
@@ -29,36 +61,50 @@ const SharePage = ({ route, navigation }) => {
     (error) => console.error("Oops, snapshot failed", error);
     };
 
-    return (
-      <>
-      <ScrollView>
-      <ViewShot
-        ref = {viewShot}
-        options={{ format: "jpg", quality: 0.7 }}
+  return (
+    <>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
       >
-      
-       <View style={styles.shareArry}>
-       <Text> {`${score}`} Six(S)</Text>
-          {shareArray.map((row, i) => 
-            <Animated.View entering={SlideInLeft.delay(i*300)}
-            key={`row-${i}`} style ={styles.row}>
-            {row.map((letter, j) => (
-                <>
-                < Animated.View entering={FlipInEasyY.delay(j*50)}  key={`cell-color-${i}-${j} `}               
-                style={styles.cell }>
-                  <Text style={styles.cellText}>{String.fromCharCode(letter.charCodeAt(0) - l)}</Text>
-                </Animated.View>
-              </>
+        <ViewShot ref={viewShot}>
+          <View style={styles.shareArry}>
+            <Text
+              style={[
+                styles.scoreText,
+                purpleShare ? styles.purpleText : styles.magentaText,
+              ]}
+            >
+              {" "}
+              {`${score}`} Six(S)
+            </Text>
+            {shareArray.map((row, i) => (
+              <Animated.View
+                entering={SlideInLeft.delay(i * 300)}
+                key={`row-${i}`}
+                style={styles.row}
+              >
+                {row.map((letter, j) => (
+                  <>
+                    <Animated.View
+                      entering={FlipInEasyY.delay(j * 50)}
+                      key={`cell-color-${i}-${j} `}
+                      style={styles.cell}
+                    >
+                      <CellText
+                        letter={letter}
+                        opacity={(letter.charCodeAt(0) - l) / 7}
+                      />
+                    </Animated.View>
+                  </>
+                ))}
+              </Animated.View>
             ))}
-          </Animated.View>
-          )}
-        </View>
-
+          </View>
         </ViewShot>
 
         <View style={styles.shareArry}>  
         <Pressable
-            style={styles.amDoneButton}
+            style={purpleShare ? styles.amDoneButtonPurple : styles.amDoneButton}
             onPress={captureAndShareScreenshot}
             >
               <Text style={styles.button}>
@@ -91,6 +137,7 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       marginVertical: 15,
       fontWeight: 'bold',
+      alignItems: 'center',
   },
     shareArry: {
       justifyContent: 'center',
@@ -104,6 +151,18 @@ const styles = StyleSheet.create({
 
         
       },
+    scoreText:{
+      fontSize: 24,
+      color: 'grey',
+    },
+    purpleText:{
+      color: '#4c00b0',
+      // opacity: time/360 ,
+    },
+    magentaText:{
+      color:colors.magenta,
+      // opacity: time/360 ,
+    },
     cell:{
         // borderWidth: 1,
         // borderColor: colors.darkgrey,
@@ -117,7 +176,6 @@ const styles = StyleSheet.create({
       cellText: {
         fontFamily: "frisbeespidercolorbox",
         fontSize: 36,
-        fontWeight: 'bold',
       },
       amDoneButton: { 
         color: colors.magenta,

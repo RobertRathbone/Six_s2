@@ -15,12 +15,12 @@ import Animated, {
   SlideInLeft, 
 } from 'react-native-reanimated';
 import * as Font from 'expo-font';
-import AppLoading from 'expo-app-loading';
-import useFonts from './hooks/useFonts';
-// import Purchases from 'react-native-purchases';
-// import  PackageItem  from './';
+import * as SplashScreen from 'expo-splash-screen'
+import { useFonts } from 'expo-font';
 import PaywallPage from './src/components/PaywallPage';
+import InstructionPage from './src/components/InstructionPage';
 import {initConnection} from 'react-native-iap';
+import { isLoaded } from 'expo-font';
 
 
 
@@ -29,13 +29,6 @@ var sendLetters = setLetters();
 var score = 0;
 let purchaserInfo = []; 
 var shareArray =  
-// ['K', 'L', 'M', 'N', 'N', 'P',
-// 'K', 'L', 'M', 'N', 'N', 'P',
-// 'K', 'L', 'M', 'N', 'N', 'P',
-// 'K', 'L', 'M', 'N', 'N', 'P',
-// 'K', 'L', 'M', 'N', 'N', 'P',
-// 'K', 'L', 'M', 'N', 'N', 'P',
-// ];
 [ ['K', 'L', 'M', 'N', 'N', 'P',],
 ['K', 'L', 'M', 'N', 'N', 'P',],
 ['K', 'L', 'M', 'N', 'N', 'P',],
@@ -43,17 +36,28 @@ var shareArray =
 ['K', 'L', 'M', 'N', 'N', 'P',],
 ['K', 'L', 'M', 'N', 'N', 'P',]
 ];
-const Stack = createNativeStackNavigator();
-const dailyLetters = LetterList[dayOfTheYear];
 const dayOfTheYear = getDayOfYear();
-const dayOfTheYearKey = getDayOfYearKey();
-const dayKey = `day-${dayOfTheYearKey}`
+const dailyLetters = LetterList[dayOfTheYear];
+// const dayOfTheYearKey = getDayOfYearKey();
+// console.log('dayOfTheYearKey', dayOfTheYearKey)
+// const dayKey = `day-${dayOfTheYearKey}`
+// console.log('dayKey', dayKey)
 const letters = sendLetters.toString().toUpperCase().replace(/,/g, "");
 
+const Stack = createNativeStackNavigator();
 const App = (() => {
   const [connected, setConnected] = useState(false);
   const [purchaserInfo, setPurchaserInfo] = useState([]);
   const [upgradeCheck, setUpgradeCheck] = useState(false);
+  const [challenge, setChallenge] = useState(false);
+  const [noTimer, setNoTimer] = useState(false);
+
+  const onToggleChallenge = () => {
+      setChallenge(!challenge);
+  }
+  const onToggleTimer = () => {
+    setNoTimer(!noTimer);
+}
 
   global.prods =[];
   useEffect(() => {
@@ -70,51 +74,32 @@ const App = (() => {
     }
   };
 
-  // useEffect(() => {
-    //Revenue cat api removed 1/3/23
-  //   let apiK = "";
-  //   console.log("In useEffect")
-  //   const main = async () => {
+  const [isReady, setIsReady] = useState(false);
 
-  //     Purchases.setDebugLogsEnabled(true);
-
-  //     await Purchases.configure({apiKey: 'appl_pypHRvkonNwzsuaWDQSwvacGnbv '});
-  //     await Purchases.configure({apiKey: 'goog_qXkCBjzUWvWJHsxFDivMbvXVDHT'});
-
-  //   };
-  //   main();
-  // }, []);
-
-  const [IsReady, setIsReady] = useState(false);
-
-  // useEffect(() => {
-  //   const main = async () => {
-  //   Purchases.setDebugLogsEnabled(true);
-  //   if (Platform.OS === 'ios') {
-  //     console.log('yo')
-  //     await Purchases.configure({apiKey: 'appl_pypHRvkonNwzsuaWDQSwvacGnbv '});
-  //     console.log('ios');
-  //   } else if (Platform.OS === 'android') {
-  //     console.log('abdroid')
-  //     await Purchases.configure({apiKey: 'goog_qXkCBjzUWvWJHsxFDivMbvXVDHT'});
-  //   };
-  //   };
-  //   main();
-  // }, [])
-  
-  const LoadFonts = async () => {
-    await useFonts();
-  }; 
-  if (!IsReady) {
-    return (
-      <AppLoading
-        startAsync={LoadFonts}
-        onFinish={() => setIsReady(true)}
-        onError={() => {}}
-      />
-    );
+  const loadFonts = async () =>{
+    await Font.loadAsync({
+      'frisbeespidercolorbox': require('./assets/fonts/frisbeespidercolorbox.ttf'),
+      // android: {
+      //   'frisbeespidercolorbox': require('./assets/fonts/frisbeespidercolorbox.ttf')
+      // }
+    });
+    setIsReady(true);
+}
+useEffect(() => {
+  // console.log('before load fonts')
+  // console.log('App.js page, daily letters --->', dailyLetters)
+  loadFonts();
+  if (Font.isLoaded('frisbeespidercolorbox')) {
+    console.log('The font is loaded!');
+  } else {
+    console.log('The font is not yet loaded...');
   }
-  
+  SplashScreen.hideAsync();
+}, []);
+
+if (!isReady) {
+  return null;
+}
 
   return (
 
@@ -125,7 +110,7 @@ const App = (() => {
                 options={{ headerShown: false }}
                 name="Login"
               >
-                {(props) => <LoginPage {...props} connected={connected} />}
+                {(props) => <LoginPage {...props} connected={connected} challenge={challenge} noTimer={noTimer}/>}
               </Stack.Screen>
                 <Stack.Screen
                 name="Paywall"
@@ -135,13 +120,23 @@ const App = (() => {
                 <Stack.Screen
                 name="Game"
                 component={Game}
-                options={{ letters: {sendLetters}}}
+                options={{ letters: {sendLetters}, challenge:{challenge}, noTimer:{noTimer}}}
                 />
                 <Stack.Screen
                 name="Share"
                 component={SharePage}
                 options={{ shareArray: {shareArray}, score: {score} }}
                 />
+                <Stack.Screen
+                name="Instruction"
+                >
+                {(props) => <InstructionPage {...props} challenge={challenge} 
+                onToggleChallenge={onToggleChallenge}
+                noTimer={noTimer}
+                onToggleTimer={onToggleTimer}
+
+                />}
+                </Stack.Screen>
                 <Stack.Screen
                 name="Final"
                 component={FinalPage}

@@ -2,7 +2,7 @@
   "expo": {
     "name": "gamesix",
     "slug": "sixSGame",
-    "version": "1.1.18",
+    "version": "1.2.14",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,17 +20,20 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.frisbeespider.SixSGame",
-      "version": "1.1.19",
-      "buildNumber": "23",
+      "buildNumber": "42",
       "icon": "./hooks/assets/0.png"
     },
     "android": {
+
       "package": "com.frisbeespider.SixSGame",
-      "versionCode": 23,
+      "versionCode": 39,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -48,8 +51,10 @@
             "enableProguardInReleaseBuilds": true
           }
         }
+        
       ],
       "react-native-iap"
     ]
+    
   }
 }
