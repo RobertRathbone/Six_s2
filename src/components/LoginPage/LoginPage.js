@@ -8,7 +8,8 @@ import { getDayOfYear, setLetters } from '../../utils';
 import * as RNIap from 'react-native-iap';
 import { getProducts } from 'react-native-iap';
 import InstructionPage from '../InstructionPage';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { updateHasPurchased } from '../../utils';
 
 
 // const dayOfTheYear = getDayOfYear();
@@ -18,8 +19,9 @@ const skus = Platform.select({
   android: ['sixs_3dollar_unlimited'],
  });
 
-const LoginPage = ({ connected, challenge, noTimer }) => {
-  const [hasPurchased, setHasPurchased] = useState(false);
+const LoginPage = ({ connected, noTimer }) => {
+  const dispatch = useDispatch();
+  const hasPurchased_sixs_3dollar_unlimited = useSelector(state => state.hasPurchased_sixs_3dollar_unlimited);
   const [purchaserInfo, setPurchaserInfo] = useState(null);
   const dayOfTheYear = getDayOfYear();
   console.log('dayOfTheYear', dayOfTheYear)
@@ -27,7 +29,9 @@ const LoginPage = ({ connected, challenge, noTimer }) => {
   console.log(dailyLetters)
   const navigation = useNavigation();
   console.log('Login page, daily letters --->', dailyLetters)
-  useEffect(() => {
+
+useEffect(() => {
+  if (!hasPurchased_sixs_3dollar_unlimited){
     async function getPurchaseStatus() {
       try {
         const result = await RNIap.initConnection();
@@ -44,30 +48,62 @@ const LoginPage = ({ connected, challenge, noTimer }) => {
         if (products && products.length > 0) {
           const purchaseUpdatedListener = RNIap.purchaseUpdatedListener(async (purchase) => {
             console.log('in useEffect, login');
-            console.log('receipt', purchase.transactionReceipt)
+            // console.log('receipt', purchase.transactionReceipt)
             if (Platform.OS === 'ios') {
-              setHasPurchased(purchase.transactionReceipt !== null);
+              dispatch(updateHasPurchased(true));
             } else if (Platform.OS === 'android') {
-              setHasPurchased(purchase.purchaseStateAndroid === 1);
+              dispatch(updateHasPurchased(true));
             }
-            console.log('Purchase updated:', purchase);
+            // console.log('Purchase updated:', purchase);
           });
-        
-          purchaseUpdatedListener.remove();
-        
-        } else {
-          console.log('No products available');
+
+          return () => {
+            purchaseUpdatedListener.remove();
+          };
         }
       } catch (e) {
-        console.log('fetchProducts error:', e);
+        console.log('Error getting products:', e);
       }
     }
 
     getPurchaseStatus();
+  }
   }, []);
 
+
+  // test code to make acknowledgePurchase work
+  // tested here, because Google only phantom refunded purchases.
+
+  // useEffect(() => {
+  //   async function checkForPurchases() {
+  //     console.log('checking for purchases');
+  //     try {
+  //       await RNIap.initConnection();
+  //       const purchases = await RNIap.getAvailablePurchases();
+  //       console.log('Check for Purchases ***** Purchases:', purchases);
+  //       const hasPurchased = purchases.some(purchase => purchase.productId === 'sixs_3dollar_unlimited');
+  //       if (hasPurchased) {
+  //         console.log('Purchased!');
+  //         const unacknowledgedPurchases = purchases.filter(purchase => !purchase.acknowledged);
+  //         console.log('Unacknowledged Purchases:', unacknowledgedPurchases);
+  //         for (const purchase of unacknowledgedPurchases) {
+  //           console.log('Purchase token', purchase.purchaseToken)
+  //           await RNIap.acknowledgePurchaseAndroid({token: `${purchase.purchaseToken}`});
+  //           console.log(`Purchase ${purchase.purchaseToken} acknowledged.`);
+  //         }
+  //       } else {
+  //         console.log('Not purchased!');
+  //       }
+  //     } catch (error) {
+  //       console.log('Error:', error);
+  //     }
+  //   }
+
+  //   checkForPurchases();
+  // }, []);
+
   const goToGame = () => {
-    navigation.navigate('Game', { letters: dailyLetters, gameState: 'playing', challenge: challenge, noTimer: noTimer });
+    navigation.navigate('Game', { letters: dailyLetters, gameState: 'playing', noTimer: noTimer });
   };
 
   const instructMe = () => {
@@ -75,14 +111,46 @@ const LoginPage = ({ connected, challenge, noTimer }) => {
   };
 
   const amIUpgraded = async () => {
+    navigation.navigate('Paywall');
+    if (hasPurchased_sixs_3dollar_unlimited){
+      navigation.navigate('Game', { letters: setLetters(), 
+        gameState: 'practice', 
+        noTimer: noTimer });
+    }
+    try {
+      const purchases = await RNIap.getAvailablePurchases();
+      console.log('Purchases:', purchases);
+      console.log('Login')
+      const hasPurchased = purchases.some(purchase => purchase.productId === 'sixs_3dollar_unlimited');
+      if (hasPurchased) {
+        console.log('En route')
+        dispatch(updateHasPurchased(true));
+        navigation.navigate('Game', { letters: setLetters(), 
+          gameState: 'practice', 
+          noTimer: noTimer });
+      } else {
+        console.log('Foiled');
+        console.log('has purchased', hasPurchased)
+        navigation.navigate('Paywall');
+      }
+    } catch (e) {
+      console.log('getAvailablePurchases error:', e);
+    }
+  };
+
+  const MultiStart = async () => {
+    if (hasPurchased_sixs_3dollar_unlimited){
+      navigation.navigate('Multi', { letters: '', 
+      gameState: 'multi', 
+      noTimer: noTimer })
+    }
     try {
       const purchases = await RNIap.getAvailablePurchases();
       console.log('Purchases:', purchases);
       const hasPurchased = purchases.some(purchase => purchase.productId === 'sixs_3dollar_unlimited');
       if (hasPurchased) {
-        navigation.navigate('Game', { letters: setLetters(), 
-          gameState: 'practice', 
-          challenge: challenge, 
+        navigation.navigate('Multi', { letters: '', 
+          gameState: 'multi', 
           noTimer: noTimer });
       } else {
         navigation.navigate('Paywall');
@@ -101,7 +169,8 @@ const LoginPage = ({ connected, challenge, noTimer }) => {
       moves right. Magenta squares are worth double. You can make 4 or 5 letter words, but 6 letter words are 
       worth double. {"\n"}
       There are two scoring modes you can change them on the Instructions Page. </Text>
-      {/* <Text style={styles.colorblock}>ABCDEFGHIJKLMNOP</Text> */}
+      <Text style={styles.colorblock}>ABCDEFGHIJKLMNOP</Text>
+      <Text style={styles.colorblockChallenge}>ABCDEFGHIJKLMNOPQRSTUVWXYZab</Text>
         <Text style={styles.title}>           Six(S)           </Text>
         <TouchableOpacity style={styles.button} onPress={goToGame}>
           <Text style={styles.buttonText}>Daily</Text>
@@ -109,12 +178,12 @@ const LoginPage = ({ connected, challenge, noTimer }) => {
         <TouchableOpacity style={styles.button} onPress={amIUpgraded}>
           <Text style={styles.buttonText}>Unlimited</Text>
         </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.button} onPress={MultiStart}>
+          <Text style={styles.buttonText}>MultiPlayer</Text>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.button} onPress={instructMe}>
           <Text style={styles.buttonText}>Instructions / Settings</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.button} onPress={() => RNIap.requestPurchase('sixs_3dollar_unlimited')}>
-          <Text style={styles.buttonText}>Upgrade to Unlimited</Text>
-        </TouchableOpacity> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -129,6 +198,10 @@ const styles = StyleSheet.create({
   },
   colorblock: {
     fontFamily: "frisbeespidercolorbox",
+    fontSize: 36,
+  },
+  colorblockChallenge: {
+    fontFamily: "Challenge",
     fontSize: 36,
   },
   scroll: {

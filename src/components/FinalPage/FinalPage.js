@@ -63,9 +63,20 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
     for (var i = 0; i < 6; i++) {
         highScoreArray[i] = [];
         for (var j = 0; j < 6; j++) {
+          if (highScoreArrayFill[k] === null){
+            highScoreArray[i][j] = 'J';
+          }else {
             highScoreArray[i][j] = highScoreArrayFill[k];
+          }
             k++;
         }
+    }
+    for (var i = 0; i < 6; i++) {
+      for (var j = 0; j < 6; j++) {
+        if (highScoreArray[i][j] === undefined) {
+          highScoreArray[i][j] = " ";
+        }
+      }
     }
     useEffect(() => {
       
@@ -120,7 +131,7 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
                 ? colors.black
                 : '#661538',
                 }]}>
-                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
+                <Text style={styles.cellText}>{letter.length > 0 ? letter.toUpperCase() : ''}</Text>
               </Animated.View>
             </>
           ))}
@@ -140,7 +151,7 @@ const FinalPage = ({ won = false, rows, score, highscore, highScores, shareArray
                 ? colors.black
                 : '#661538',
                 }]}>
-                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
+                <Text style={styles.cellText}>{letter.length > 0 ? letter.toUpperCase() : ''}</Text>
               </Animated.View>
             </>
           ))}

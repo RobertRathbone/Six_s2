@@ -21,6 +21,52 @@ export const copyArray = (arr) => {
     return day ;
   };
 
+  export const incrementScore = (score) => {
+    return {
+      type: 'INCREMENT_SCORE',
+      payload: score,
+      
+    };
+  };
+
+  export const updateMaxScore = (newMaxScore) => {
+    return {
+      type: 'UPDATE_MAX_SCORE',
+      payload: newMaxScore
+    };
+  };
+
+  export const updateGameMode = (gameMode) => {
+    return {
+      type: 'SET_GAME_MODE',
+      payload: gameMode
+    };
+  };
+
+  export const updateHighScore = (highScore) => {
+    return {
+      type: 'UPDATE_HIGH_SCORE',
+      payload: highScore
+    };
+  };
+
+  export const updateHasPurchased = (value) => {
+    return {
+      type: 'UPDATE_HAS_PURCHASED',
+      payload: value,
+    };
+  };
+
+  export const setChallenge = (challenge) => ({
+    type: 'SET_CHALLENGE',
+    payload: challenge,
+  });
+  
+  export const setTimer = (noTimer) => ({
+    type: 'SET_TIMER',
+    payload: noTimer,
+  });
+
   export const setLetters = () => {
     const twelveCommon = [ 'r', 't', 'n', 'l', 'c', 'd', 'p', 'm', 'h', 'g', 'f', 'k'];
     const nextEight = ['b', 'y', 'w', 'v', 'x', 'j', 'q', 'z'];

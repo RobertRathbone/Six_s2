@@ -16,13 +16,13 @@ export const colors = {
     // [colors.pink]: frisbeespidercolorbox.ttf
   };
   
-  export const ENTER = "ENTER";
+  export const SCORE = "SCORE";
   export const CLEAR = "CLEAR";
   
   export const keys = [
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
     [ "↑", "a", "s", "d", "f", "g", "h", "j", "k", "l", "↓"],
-    [ENTER, "z", "x", "c", "v", "b", "n", "m", CLEAR],
+    [SCORE, "z", "x", "c", "v", "b", "n", "m", CLEAR],
   ];
 
   export const consonants = [

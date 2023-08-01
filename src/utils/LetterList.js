@@ -241,7 +241,7 @@ export default [
       ],
       [
         "o",
-        "a",
+        "u",
         "e",
         "l",
         "r",
@@ -637,7 +637,7 @@ export default [
       ],
       [
         "a",
-        "o",
+        "u",
         "e",
         "t",
         "f",
@@ -661,7 +661,7 @@ export default [
       ],
       [
         "a",
-        "i",
+        "u",
         "e",
         "h",
         "d",
@@ -2531,7 +2531,7 @@ export default [
         "b",
         "s",
       ],
-      , [
+       [
         "u",
         "i",
         "e",

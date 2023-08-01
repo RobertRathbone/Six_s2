@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { keys, ENTER, CLEAR, colors } from "../../constants";
+import { keys, SCORE, CLEAR, colors } from "../../constants";
 import styles, { keyWidth } from "./Keyboard.styles";
 
 const Keyboard = ({
@@ -9,7 +9,7 @@ const Keyboard = ({
   greyCaps = [],
 }) => {
   const isLongButton = (key) => {
-    return key === ENTER || key === CLEAR;
+    return key === SCORE || key === CLEAR;
   };
 
   const getKeyBGColor = (key) => {

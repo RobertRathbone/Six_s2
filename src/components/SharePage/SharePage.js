@@ -9,33 +9,22 @@ import {
 import { useRef } from "react";
 import Animated, { SlideInLeft, FlipInEasyY } from "react-native-reanimated";
 import { colors } from "../../constants";
+import { getDayOfYear, getDayOfYearKey, } from '../../utils';
 import ViewShot from "react-native-view-shot";
-import * as Sharing from "expo-sharing";
-// import { captureRef } from "react-native-view-shot";
+import Share from "react-native-share";
 
 const SharePage = ({ route, navigation }) => {
   const { shareArray, score, purpleShare, time } = route.params;
   const viewShot = useRef();
-  console.log('sharePage', shareArray);
-  console.log("purple? ", purpleShare);
+  const dayO = getDayOfYear();
+  // console.log('sharePage', shareArray);
+  // console.log("purple? ", purpleShare);
   if (purpleShare == 1) {
     var l = 9;
     console.log("set l ---> ", l);
   } else {
     var l = 0;
   }
-
-// const firstSixItems = shareArray.slice(0, 1).map(row => row.slice(0, 6));
-// const firstSixItemsAreEqual = firstSixItems.every(
-//   row => row.every((item, index, arr) => item === arr[0])
-// );
-
-// if ( firstSixItemsAreEqual) {
-//   // Navigate back to the component where shareArray is generated
-//   navigation.goBack();
-//   return null;
-// }
-
 
   const CellText = ({ letter, opacity }) => {
     const androidOpacity =
@@ -53,13 +42,15 @@ const SharePage = ({ route, navigation }) => {
     );
   };
 
-    captureAndShareScreenshot = () => {
-    viewShot.current.capture().then((uri) => {
-    console.log("do something with ", uri);
-    Sharing.shareAsync("file://" + uri);
-    }),
-    (error) => console.error("Oops, snapshot failed", error);
-    };
+  const captureAndShareScreenshot = async () => {
+    try {
+      const uri = await viewShot.current.capture();
+      console.log("do something with ", uri);
+      await Share.open({ url: uri });
+    } catch (error) {
+      console.error("Oops, snapshot failed", error);
+    }
+  };
 
   return (
     <>
@@ -74,8 +65,9 @@ const SharePage = ({ route, navigation }) => {
                 purpleShare ? styles.purpleText : styles.magentaText,
               ]}
             >
-              {" "}
-              {`${score}`} Six(S)
+
+              
+            {`${ score}`} Six(S)
             </Text>
             {shareArray.map((row, i) => (
               <Animated.View
@@ -99,6 +91,14 @@ const SharePage = ({ route, navigation }) => {
                 ))}
               </Animated.View>
             ))}
+            <Text
+              style={[
+              styles.scoreText,
+              purpleShare ? styles.purpleText2 : styles.magentaText,
+            ]}
+             >
+           # {`${ dayO}`} 
+          </Text>
           </View>
         </ViewShot>
 
@@ -112,11 +112,11 @@ const SharePage = ({ route, navigation }) => {
               </Text>
         </Pressable>
         </View>
-        </ScrollView>
-      </>
-
-    );
+      </ScrollView>
+    </>
+  );
 };
+
 
 const styles = StyleSheet.create({
     title: {
@@ -154,13 +154,19 @@ const styles = StyleSheet.create({
     scoreText:{
       fontSize: 24,
       color: 'grey',
+
     },
     purpleText:{
       color: '#4c00b0',
       // opacity: time/360 ,
     },
+    purpleText2:{
+      opacity: 0,
+    },
     magentaText:{
       color:colors.magenta,
+      justifyContent: 'center',
+      alignItems: 'center',
       // opacity: time/360 ,
     },
     cell:{
